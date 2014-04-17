@@ -1,50 +1,4 @@
- Skip to content
-
-    Explore
-    Gist
-    Blog
-    Help
-
-    cocktailyogi cocktailyogi
-
-    1
-    0
-    0
-
-public cocktailyogi/EggDuino
-
-    Code
-    Issues 0
-    Pull Requests 0
-    Wiki
-
-    Pulse
-    Graphs
-    Network
-
-    Settings
-
-HTTPS clone URL
-
-You can clone with HTTPS, SSH, or Subversion.
-
-Arduino Firmware for Eggbot / Spherebot with Inkscape
-— Edit
-
-    3 commits
-    1 branch
-    0 releases
-    1 contributor
-
-EggDuino /
-
-Update README.md
-latest commit f727568a72
-cocktailyogi cocktailyogi authored just now
-	LICENSE 	Initial commit 	an hour ago
-	README.md 	Update README.md 	just now
-README.md
-EggDuino
+ Arduino Firmware for Eggbot / Spherebot with Inkscape
 
 Arduino Firmware for Eggbot / Spherebot with Inkscape-Integration
 
@@ -75,16 +29,4 @@ Todos and Feature-Wishlist:
     implement hardware-button , EGGBOT-Guys call it "PRG-Button"
     Replace Stepper Control ACCELSTEPPER --> DDS, interruptbased control to improve step-precision and smoothness. (I really need help with this, but this would be the best improovement)
 
-    Status
-    API
-    Training
-    Shop
-    Blog
-    About
-
-    © 2014 GitHub, Inc.
-    Terms
-    Privacy
-    Security
-    Contact
-
+  
