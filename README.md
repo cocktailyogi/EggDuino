@@ -20,6 +20,7 @@ Tested and fully functional with Inkscape.
 Installation:
 
 - Upload Eggduino.ino with Arduino-IDE or similar tool to your Arudino (i.e. Uno)
+- Disable Autoreset on Arduinoboard (there are several ways to do this... Which one does not matter...)
 - Install Inkscape Tools wit Eggbot extension. Detailed instructions: (You yust need to complete Steps 1 and 2)          http://wiki.evilmadscientist.com/Installing_software
 
 - Because of an bug in the Eggbot-extension (Function findEiBotBoards()), the Eggduino cannot be detected by default.     Hopefully, the guys will fix this later on. But we can fix it on our own.
