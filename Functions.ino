@@ -93,8 +93,8 @@ void stepperMove(){
         //Move-Code:
            digitalWrite(enableRotMotor, LOW) ;
            digitalWrite(enablePenMotor, LOW) ;
-		   long rotSteps = ((float) (rotMicrostep/rotStepMode)) * rotStepsEBB; //transform to local coordiantes
-		   long penSteps = ((float) (penMicrostep/penStepMode)) * penStepsEBB; //transform to local coordiantes
+		   long rotSteps = round( ((float) (rotMicrostep/rotStepMode)) * rotStepsEBB ); //transform to local coordiantes
+		   long penSteps = round( ((float) (penMicrostep/penStepMode)) * penStepsEBB ); //transform to local coordiantes
 		   float rotSpeed = (float) ( ((long) rotSteps * (long)1000) / (long) duration ) ;
 		   float penSpeed = (float) ( ((long) penSteps * (long)1000) / (long) duration ) ;
            rotMotor.move(rotSteps);

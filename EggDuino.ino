@@ -23,7 +23,7 @@ Thanks to my wife and my daughter for their patience. :-)
 #include <Servo.h>
 #include "SerialCommand.h" //nice lib from Stefan Rado, https://github.com/kroimon/Arduino-SerialCommand
 
-#define initSting "EBB 2.1.0+ Protocol emulated by Eggduino-Firmware V1.0"
+#define initSting "EBB 2.1.0+ Protocol emulated by Eggduino-Firmware V1.1"
 //Rotational Stepper
   #define step1 11
   #define dir1 10

@@ -1,0 +1,5 @@
+22.04.2014 V1.1
+bugfix Command SM - fixed rounding error in pen and rot-axis
+
+17.04.2014	V1.0
+initial release
