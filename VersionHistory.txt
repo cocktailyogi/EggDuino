@@ -1,3 +1,12 @@
+23.04.2014 v1.2
+complete rework of Move-Algorithm, no position errors any more, complete in integer math //it was the hell to debug it... ;-)
+optimized timing of Ack-Answer
+added command QP "Query Pen", untested, answer might be wrong 0 <--> 1?
+optimized Init-String for EBBv13
+optimized some variable types to enhance memory performance
+changed enablePenMotor to 6 by default to match it to Spherebot Electronics
+changed default maxSpeeds from 1000 to 2000;
+
 22.04.2014 V1.1
 bugfix Command SM - fixed rounding error in pen and rot-axis
 

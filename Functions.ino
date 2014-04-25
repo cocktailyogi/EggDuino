@@ -1,6 +1,6 @@
 
 void makeComInterface(){
-  SCmd.addCommand("v",sendVersion); // Converts two arguments to integers and echos them back
+  SCmd.addCommand("v",sendVersion); 
   SCmd.addCommand("EM",enableMotors);
   SCmd.addCommand("SC",stepperModeConfigure);
   SCmd.addCommand("SP",setPen);
@@ -14,16 +14,29 @@ void makeComInterface(){
   SCmd.addCommand("QN",queryNodeCount);
   SCmd.addCommand("SL",setLayer);
   SCmd.addCommand("QL",queryLayer);
+  SCmd.addCommand("QP",queryPen);
   SCmd.addCommand("QB",queryButton); //preparation for "PRG" Button, actually gives fake answer, 
   SCmd.setDefaultHandler(unrecognized); // Handler for command that isn't matched (says "What?") 
   }
-  
+
+void queryPen() {
+	char state;
+	if (penState=penUpPos)
+		state='1';
+	else
+		state='0';
+	Serial.print(String(state)+"\r\n");
+	sendAck();
+}
+
 void queryButton() {
-	Serial.print(String(prgButtonState) +"\r\n" + "OK\r\n");
+	Serial.print(String(prgButtonState) +"\r\n");
+	sendAck();
 }
   
 void queryLayer() {
-  Serial.print(String(layer) +"\r\n" + "OK\r\n");
+  Serial.print(String(layer) +"\r\n");
+  sendAck();
   } 
   
 void setLayer() {
@@ -33,14 +46,16 @@ void setLayer() {
 	  if (arg1 != NULL) {
 		  value = atoi(arg1);
 		  layer=value;
-		  Serial.print("OK\r\n");
+		  sendAck();
 	  }
 	  else
-	  Serial.print("unknown CMD\r\n");
+	  sendError();
   }
   
 void queryNodeCount() {
-	Serial.print(String(nodeCount) +"\r\n" + "OK\r\n");
+    Serial.print(String(nodeCount) +"\r\n");
+	sendAck();
+	
 }
 
 void setNodeCount() {
@@ -50,26 +65,26 @@ void setNodeCount() {
 	if (arg1 != NULL) {
 		value = atoi(arg1);
 		nodeCount=value;
-		Serial.print("OK\r\n");
+		sendAck();
 	}
 	else
-		Serial.print("unknown CMD\r\n");
+		sendError();
 }
 
 void nodeCountIncrement() {
 	nodeCount=nodeCount++;
-	Serial.print("OK\r\n");	
+	sendAck();	
 }
 
 void nodeCountDecrement() {
 	nodeCount=nodeCount--;
-	Serial.print("OK\r\n");
+	sendAck();
 }
 
 void stepperMove(){
   uint16_t duration=0; //in ms
-  long penStepsEBB=0; //Pen
-  long rotStepsEBB=0; //Rot
+  int penStepsEBB=0; //Pen
+  int rotStepsEBB=0; //Rot
   char *arg1;
   char *arg2;
   char *arg3;
@@ -84,32 +99,47 @@ void stepperMove(){
       }
    if (arg3 != NULL) {
       rotStepsEBB = atoi(arg3);
-      Serial.print("OK\r\n");
+	  //sendAck();
       
-       if ( (penStepsEBB==0) && (rotStepsEBB==0) )
+       if ( (penStepsEBB==0) && (rotStepsEBB==0) ) {
           delay(duration);
-          
+		  sendAck();
+	   }
        if ( (penStepsEBB!=0) || (rotStepsEBB!=0) )  {
-        //Move-Code:
-           digitalWrite(enableRotMotor, LOW) ;
+//################### Move-Code Start ############################################################
+           //Turn on Motors, if they are off....
+		   digitalWrite(enableRotMotor, LOW) ;
            digitalWrite(enablePenMotor, LOW) ;
-		   long rotSteps = round( ((float) (rotMicrostep/rotStepMode)) * rotStepsEBB ); //transform to local coordiantes
-		   long penSteps = round( ((float) (penMicrostep/penStepMode)) * penStepsEBB ); //transform to local coordiantes
-		   float rotSpeed = (float) ( ((long) rotSteps * (long)1000) / (long) duration ) ;
-		   float penSpeed = (float) ( ((long) penSteps * (long)1000) / (long) duration ) ;
-           rotMotor.move(rotSteps);
-           rotMotor.setSpeed(rotSpeed);
-           penMotor.move(penSteps);
+		   //incoming EBB-Steps will be multiplied by 16, then Integer-maths is done, result will be divided by 16
+		   // This make thinks here really complicated, but floating point-math kills performance and memory, believe me... I tried...
+		   long rotSteps =   (  (long)rotStepsEBB * 16 / rotStepCorrection) + (long)rotStepError;	//correct incoming EBB-Steps to our microstep-Setting and multiply  by 16 to avoid floatingpoint...
+		   long penSteps =   (  (long)penStepsEBB * 16 / penStepCorrection) + (long)penStepError;
+		   int rotStepsToGo = (int) (rotSteps/16);		//Calc Steps to go, which are possible on our machine
+		   int penStepsToGo = (int) (penSteps/16);
+		   rotStepError = (long)rotSteps - ((long) rotStepsToGo * (long)16);	// calc Position-Error, if there is one
+		   penStepError = (long)penSteps - ((long) penStepsToGo * (long)16);
+		   long temp_rotSpeed =  ((long)rotStepsToGo * (long)1000 / (long)duration );	// calc Speed in Integer Math
+		   long temp_penSpeed =  ((long)penStepsToGo * (long)1000 / (long)duration ) ;
+		   if (temp_rotSpeed <0 ) //remove sign, there is no negative Speed....
+			   temp_rotSpeed= -temp_rotSpeed;
+		   if (temp_penSpeed <0 ) //remove sign, there is no negative Speed....
+			   temp_penSpeed= -temp_penSpeed;
+		   float rotSpeed= (float) temp_rotSpeed;	// type cast 
+		   float penSpeed= (float) temp_penSpeed;
+           rotMotor.move(rotStepsToGo);		// finally, let us set the target position...
+           rotMotor.setSpeed(rotSpeed);		// and the Speed!
+           penMotor.move(penStepsToGo);
            penMotor.setSpeed( penSpeed );
            while ( penMotor.distanceToGo() || rotMotor.distanceToGo() ) { 
-				   penMotor.runSpeedToPosition();
+				   penMotor.runSpeedToPosition(); // Moving.... moving... moving....
 				   rotMotor.runSpeedToPosition();
-			     }     
-         //end Move-Code
+			     }
+//################### Move-Code End ############################################################
+		   sendAck();     //Mission completed
             }
 	  }
    else
-      Serial.print("unknown CMD\r\n");
+      sendError();
        
 }
 
@@ -125,18 +155,16 @@ void setPen(){
 		  case 0:
 		  penServo.write(penUpPos);
 		  penState=penUpPos;
-		  Serial.print("OK\r\n");
 		  break;
 		  
 		  case 1:
 		  penServo.write(penDownPos);
 		  penState=penDownPos;
 		  //Serial.println("case 1");
-		  Serial.print("OK\r\n");
 		  break;
 		  
 		  default:
-		  Serial.print("unknown CMD");
+		  sendError();
 	  }
   }
   char *val; 
@@ -145,12 +173,14 @@ void setPen(){
 		  value = atoi(val);
 		//  Serial.println("delayvalue");
 	      delay(value);
+		  sendAck();
 		  }
   if (val==NULL && arg !=NULL)  
 			delay(500);
+			sendAck();
 		//	Serial.println("delay");
   if (val==NULL && arg ==NULL)
-		Serial.print("unknown CMD\r\n");
+			sendError();
 }  
 
 void togglePen(){
@@ -162,20 +192,21 @@ void togglePen(){
   if (penState==penUpPos) {
             penServo.write(penDownPos);
             penState=penDownPos;
-            Serial.print("OK\r\n");
             if (arg != NULL) 
                       delay(value);
             else   
                       delay(500);
+			sendAck();
             }
+			
   else   {
             penServo.write(penUpPos);
             penState=penUpPos;
-            Serial.print("OK\r\n");
             if (arg != NULL) 
                       delay(value);
             else   
                       delay(500);
+		    sendAck();
         }    
 }  
   
@@ -196,40 +227,48 @@ void enableMotors(){
      switch (cmd) { 
        case 0: digitalWrite(enableRotMotor, HIGH) ;
                digitalWrite(enablePenMotor, HIGH) ;
-               Serial.print("OK\r\n");
+               sendAck();
                break;       
        case 1: rotStepMode=16; 
                penStepMode=16;
                digitalWrite(enableRotMotor, LOW) ;
                digitalWrite(enablePenMotor, LOW) ;
-               Serial.print("OK\r\n");
+               sendAck();
                break;
        case 2: rotStepMode=8; 
                penStepMode=8;
+			   rotStepCorrection = rotStepMode/rotMicrostep;
+			   penStepCorrection = penStepMode/penMicrostep;
                digitalWrite(enableRotMotor, LOW) ;
                digitalWrite(enablePenMotor, LOW) ;
-               Serial.print("OK\r\n");
+               sendAck();
                break;
        case 3: rotStepMode=4; 
                penStepMode=4;
+			   rotStepCorrection = rotStepMode/rotMicrostep;
+			   penStepCorrection = penStepMode/penMicrostep;
                digitalWrite(enableRotMotor, LOW) ;
                digitalWrite(enablePenMotor, LOW) ;
-               Serial.print("OK\r\n");
+               sendAck();
                break;
        case 4: rotStepMode=2; 
                penStepMode=2;
+			   rotStepCorrection = rotStepMode/rotMicrostep;
+			   penStepCorrection = penStepMode/penMicrostep;
                digitalWrite(enableRotMotor, LOW) ;
                digitalWrite(enablePenMotor, LOW) ;
-               Serial.print("OK\r\n");
+               sendAck();
                break;
        case 5: rotStepMode=1; 
                penStepMode=1;
+			   rotStepCorrection = rotStepMode/rotMicrostep;
+			   penStepCorrection = penStepMode/penMicrostep;
                digitalWrite(enableRotMotor, LOW) ;
                digitalWrite(enablePenMotor, LOW) ;
-               Serial.print("OK\r\n");
+               sendAck();
                break;
        default:
-               Serial.print("unknown CMD\r\n");
+               sendError();
       }
 }
 //the following implementaion is a little bit cheated, because i did not know, how to implement different values for first and second argument.
@@ -237,41 +276,41 @@ void enableMotors(){
      switch (value) {    
        case 0: digitalWrite(enableRotMotor, HIGH) ;
                digitalWrite(enablePenMotor, HIGH) ;
-               Serial.print("OK\r\n");
+               sendAck();
                break;  
        case 1: rotStepMode=16; 
                penStepMode=16;
                digitalWrite(enableRotMotor, LOW) ;
                digitalWrite(enablePenMotor, LOW) ;
-               Serial.print("OK\r\n");
+               sendAck();
                break;
        case 2: rotStepMode=8; 
                penStepMode=8;
                digitalWrite(enableRotMotor, LOW) ;
                digitalWrite(enablePenMotor, LOW) ;
-               Serial.print("OK\r\n");
+               sendAck();
                break;
        case 3: rotStepMode=4; 
                penStepMode=4;
                digitalWrite(enableRotMotor, LOW) ;
                digitalWrite(enablePenMotor, LOW) ;
-               Serial.print("OK\r\n");
+               sendAck();
                break;
        case 4: rotStepMode=2; 
                penStepMode=2;
                digitalWrite(enableRotMotor, LOW) ;
                digitalWrite(enablePenMotor, LOW) ;
-               Serial.print("OK\r\n");
+               sendAck();
                break;
        case 5: rotStepMode=1; 
                penStepMode=1;
                digitalWrite(enableRotMotor, LOW) ;
                digitalWrite(enablePenMotor, LOW) ;
-               Serial.print("OK\r\n");
+               sendAck();
                break;
        
        default:
-               Serial.print("unknown CMD\r\n");
+               sendError();
       }
   }
 }
@@ -291,25 +330,25 @@ void stepperModeConfigure(){
   if ((arg != NULL) && (val != NULL)){
      switch (cmd) {      
        case 4: penDownPos= (int) ((float) (value-6000)/(float) 94.18); // transformation from EBB to PWM-Stepper
-               Serial.print("OK\r\n");
+               sendAck();
                break;
        case 5: penUpPos= (int)((float) (value-6000)/(float) 94.18); // transformation from EBB to PWM-Stepper
-               Serial.print("OK\r\n");
+               sendAck();
                break;
        case 6: //rotMin=value;    ignored
-               Serial.print("OK\r\n");
+               sendAck();
                break;
        case 7: //rotMax=value;    ignored
-               Serial.print("OK\r\n");
+               sendAck();
                break;
        case 11: servoRateUp=value;
-                Serial.print("OK\r\n");
+                sendAck();
                 break;
        case 12: servoRateDown=value;
-                Serial.print("OK\r\n");
+                sendAck();
                 break;
        default:
-               Serial.print("unknown CMD\r\n");
+               sendError();
       }
   }
 }
@@ -320,9 +359,9 @@ void sendVersion(){
   }
   
   void unrecognized(const char *command){
-  Serial.print("unknown CMD\r\n");
+  sendError();
   }
   
   void ignore(){
-  Serial.print("OK\r\n");
+  sendAck();
   }
