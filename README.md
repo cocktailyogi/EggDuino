@@ -3,6 +3,8 @@ Eggduino
 
 Arduino Firmware for Eggbot / Spherebot with Inkscape-Integration
 
+Version 1.2
+
 Regards: Eggduino-Firmware by Joachim Cerny, 2014
 
 Thanks for the nice libs ACCELSTEPPER and SERIALCOMMAND, which made this project much easier. Thanks to the Eggbot-Team for such a funny and enjoable concept! Thanks to my wife and my daughter for their patience. :-)
@@ -38,6 +40,4 @@ Todos and Feature-Wishlist:
 - collision control via penMin/penMax
 - implement homing sequence via microswitch or optical device
 - implement hardware-button , EGGBOT-Guys call it "PRG-Button"
-- Replace Stepper Control ACCELSTEPPER --> DDS, interruptbased control to improve step-precision and smoothness. (I really need help with this, but this would be the best improovement)
-
   
