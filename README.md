@@ -7,7 +7,7 @@ Version 1.2
 
 Regards: Eggduino-Firmware by Joachim Cerny, 2014
 
-Thanks for the nice libs ACCELSTEPPER and SERIALCOMMAND, which made this project much easier. Thanks to the Eggbot-Team for such a funny and enjoable concept! Thanks to my wife and my daughter for their patience. :-)
+Thanks for the nice libs ACCELSTEPPER and SERIALCOMMAND, which made this project much easier. Thanks to the Eggbot-Team for such a funny and enjoyable concept! Thanks to my wife and my daughter for their patience. :-)
 
 Features:
 
