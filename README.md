@@ -27,13 +27,16 @@ Installation:
 
 - Because of an bug in the Eggbot-extension (Function findEiBotBoards()), the Eggduino cannot be detected by default.     Hopefully, the guys will fix this later on. But we can fix it on our own.
     It is quiete easy:
-    Instructions: Go to your Inkscape-Installationfolder and navigate to subfolder
-    .\App\Inkscape\share\extensions
-    open File "eggbot.py" in texteditor and search for:
-    "Try any devices which seem to have EBB boards attached" delete or uncomment the following 6 lines
-    (example: in Version 2.3.4 line 1353-1357)
-    save file and enjoy your selfmade Eggbot/Spherebot with full Inkscape-Integration.
-    Prepare some Eggs and have fun.
+    
+        Go to your Inkscape-Installationfolder and navigate to subfolder .\App\Inkscape\share\extensions open File            "eggbot.py" in texteditor and search for: "self.svgSerialPort" around row 1348
+        Replace "self.svgSerialPort" in "line serialPort = self.testSerialPort( self.svgSerialPort )" with your               COM-port-number.
+            COM1 is 0
+            COM2 is 1
+            COM3 is 2 etc....
+
+        example:
+            So if your arduino / eggduino is located at COM3 it should look like:
+            "line serialPort = self.testSerialPort(2)"
 
 Todos and Feature-Wishlist:
 
