@@ -23,13 +23,16 @@ Installation:
 
 - Upload Eggduino.ino with Arduino-IDE or similar tool to your Arudino (i.e. Uno)
 - Disable Autoreset on Arduinoboard (there are several ways to do this... Which one does not matter...)
-- Install Inkscape Tools wit Eggbot extension. Detailed instructions: (You yust need to complete Steps 1 and 2)          http://wiki.evilmadscientist.com/Installing_software
+- Install Inkscape Tools wit Eggbot extension. Detailed instructions: (You yust need to complete Steps 1 and 2)
+http://wiki.evilmadscientist.com/Installing_software
 
-- Because of an bug in the Eggbot-extension (Function findEiBotBoards()), the Eggduino cannot be detected by default.     Hopefully, the guys will fix this later on. But we can fix it on our own.
+- Because of an bug in the Eggbot-extension (Function findEiBotBoards()), the Eggduino cannot be detected by default.
+	Hopefully, the guys will fix this later on. But we can fix it on our own.
     It is quiete easy:
-    
-        Go to your Inkscape-Installationfolder and navigate to subfolder .\App\Inkscape\share\extensions open File            "eggbot.py" in texteditor and search for: "self.svgSerialPort" around row 1348
-        Replace "self.svgSerialPort" in "line serialPort = self.testSerialPort( self.svgSerialPort )" with your               COM-port-number.
+	
+        - Go to your Inkscape-Installationfolder and navigate to subfolder .\App\Inkscape\share\extensions
+		- open File "eggbot.py" in texteditor and search for: "self.svgSerialPort" around row 1348
+        - Replace "self.svgSerialPort" in "line serialPort = self.testSerialPort( self.svgSerialPort )" with your COM-port-number.
             COM1 is 0
             COM2 is 1
             COM3 is 2 etc....
