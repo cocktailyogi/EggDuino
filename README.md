@@ -3,9 +3,10 @@ Eggduino
 
 Arduino Firmware for Eggbot / Spherebot with Inkscape-Integration
 
-Version 1.2
+Version 1.3
+tested with Inkscape Portable 0.91, Eggbot Extension and patched eggbot.py
 
-Regards: Eggduino-Firmware by Joachim Cerny, 2014
+Regards: Eggduino-Firmware by Joachim Cerny, 2015
 
 Thanks for the nice libs ACCELSTEPPER and SERIALCOMMAND, which made this project much easier. Thanks to the Eggbot-Team for such a funny and enjoyable concept! Thanks to my wife and my daughter for their patience. :-)
 
@@ -31,19 +32,18 @@ http://wiki.evilmadscientist.com/Installing_software
     It is quiete easy:
 	
         - Go to your Inkscape-Installationfolder and navigate to subfolder .\App\Inkscape\share\extensions
-		- open File "eggbot.py" in texteditor and search for: "self.svgSerialPort" around row 1348
-        - Replace "self.svgSerialPort" in "line serialPort = self.testSerialPort( self.svgSerialPort )" with your COM-port-number.
-            COM1 is 0
-            COM2 is 1
-            COM3 is 2 etc....
-
-        example:
-            So if your arduino / eggduino is located at COM3 it should look like:
-            "line serialPort = self.testSerialPort(2)"
-
+		- open File "eggbot.py" in texteditor and search for line:
+			"Try any devices which seem to have EBB boards attached"
+                - uncomment that block like this:
+                		# Try any devices which seem to have EBB boards attached
+				# for strComPort in eggbot_scan.findEiBotBoards():
+				#	serialPort = self.testSerialPort( strComPort )
+				#	if serialPort:
+				#		self.svgSerialPort = strComPort
+				#		return serialPort
+		- In my version lines 1355-1360
+ 
 Todos and Feature-Wishlist:
 
-- collision control via penMin/penMax
-- implement homing sequence via microswitch or optical device
 - implement hardware-button , EGGBOT-Guys call it "PRG-Button"
   
