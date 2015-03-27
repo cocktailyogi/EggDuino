@@ -109,7 +109,7 @@ void stepperMove(){
 //################### Move-Code Start ############################################################
            //Turn on Motors, if they are off....
 		   digitalWrite(enableRotMotor, LOW) ;
-           digitalWrite(enablePenMotor, LOW) ;
+                   digitalWrite(enablePenMotor, LOW) ;
 		   //incoming EBB-Steps will be multiplied by 16, then Integer-maths is done, result will be divided by 16
 		   // This make thinks here really complicated, but floating point-math kills performance and memory, believe me... I tried...
 		   long rotSteps =   (  (long)rotStepsEBB * 16 / rotStepCorrection) + (long)rotStepError;	//correct incoming EBB-Steps to our microstep-Setting and multiply  by 16 to avoid floatingpoint...
@@ -329,10 +329,10 @@ void stepperModeConfigure(){
       value = atoi(val);
   if ((arg != NULL) && (val != NULL)){
      switch (cmd) {      
-       case 4: penDownPos= (int) ((float) (value-6000)/(float) 94.18); // transformation from EBB to PWM-Stepper
+       case 4: penDownPos= (int) ((float) (value-6000)/(float) 133.3); // transformation from EBB to PWM-Servo
                sendAck();
                break;
-       case 5: penUpPos= (int)((float) (value-6000)/(float) 94.18); // transformation from EBB to PWM-Stepper
+       case 5: penUpPos= (int)((float) (value-6000)/(float) 133.3); // transformation from EBB to PWM-Servo
                sendAck();
                break;
        case 6: //rotMin=value;    ignored

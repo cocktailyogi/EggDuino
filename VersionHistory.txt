@@ -1,3 +1,8 @@
+26.03.2015 v1.3
+updated Accelstepper-Lib
+set Microstepping Factor 16 by default.
+fixed bug in Pen-position-transformation
+
 23.04.2014 v1.2
 complete rework of Move-Algorithm, no position errors any more, complete in integer math //it was the hell to debug it... ;-)
 optimized timing of Ack-Answer
