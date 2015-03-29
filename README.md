@@ -3,7 +3,7 @@ Eggduino
 
 Arduino Firmware for Eggbot / Spherebot with Inkscape-Integration
 
-Version 1.3
+Version 1.4s
 tested with Inkscape Portable 0.91, Eggbot Extension and patched eggbot.py
 
 Regards: Eggduino-Firmware by Joachim Cerny, 2015
@@ -34,7 +34,7 @@ http://wiki.evilmadscientist.com/Installing_software
         - Go to your Inkscape-Installationfolder and navigate to subfolder .\App\Inkscape\share\extensions
 		- open File "eggbot.py" in texteditor and search for line:
 			"Try any devices which seem to have EBB boards attached"
-                - uncomment that block like this:
+                - comment that block with "#" like this:
                 		# Try any devices which seem to have EBB boards attached
 				# for strComPort in eggbot_scan.findEiBotBoards():
 				#	serialPort = self.testSerialPort( strComPort )

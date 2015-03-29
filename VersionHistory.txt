@@ -1,3 +1,9 @@
+29.03.2015 v1.4
+added prototype for PRG-Button support. somebody has to test it. Connect pushbutton between Pin2 und GND.
+disabled ccordinate transform for 16-microstepping, because Inkscape sends in 16-microstepping, as well.
+removed commands for changing rotStepmodes
+fixed some minor bugs
+
 26.03.2015 v1.3
 updated Accelstepper-Lib
 set Microstepping Factor 16 by default.

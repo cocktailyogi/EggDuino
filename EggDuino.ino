@@ -24,7 +24,7 @@ Thanks to my wife and my daughter for their patience. :-)
 #include <Servo.h>
 #include "SerialCommand.h" //nice lib from Stefan Rado, https://github.com/kroimon/Arduino-SerialCommand
 
-#define initSting "EBBv13_and_above Protocol emulated by Eggduino-Firmware V1.3"
+#define initSting "EBBv13_and_above Protocol emulated by Eggduino-Firmware V1.4"
 //Rotational Stepper
   #define step1 11
   #define dir1 10
@@ -37,6 +37,7 @@ Thanks to my wife and my daughter for their patience. :-)
   #define penMicrostep 16 //MicrostepMode, only 1,2,4,8,16 allowed, because of Integer-Math in this Sketch
 //Servo
   #define servoPin 3
+  #define PrgButton 2 //optional Pushbutton between Pin and Ground to use certain functions with Eggbot-Inkscape extension
 
 //make Objects
   AccelStepper rotMotor(1, step1, dir1);
@@ -48,19 +49,17 @@ Thanks to my wife and my daughter for their patience. :-)
   int penMin=0;
   int penMax=0;
   int penUpPos=5;  //can be overwritten from EBB-Command SC
-  int penDownPos=30; //can be overwritten from EBB-Command SC
+  int penDownPos=20; //can be overwritten from EBB-Command SC
   int servoRateUp=0; //from EBB-Protocol not implemented on machine-side
   int servoRateDown=0;//from EBB-Protocol not implemented on machine-side
-  uint8_t rotStepMode=16; //1/16 by default, can be changed by EBB protocol, used as correction factor
-  uint8_t penStepMode=16; //1/16 by default, can be changed by EBB protocol, used as correction factor
   long rotStepError=0;
   long penStepError=0;
   int penState=penUpPos;
   uint32_t nodeCount=0;
   unsigned int layer=0;
-  int prgButtonState=0;
-  uint8_t rotStepCorrection = rotStepMode/rotMicrostep ; //devide EBB-Coordinates by this factor to get EGGduino-Steps
-  uint8_t penStepCorrection = penStepMode/penMicrostep ; //devide EBB-Coordinates by this factor to get EGGduino-Steps
+  boolean prgButtonState=0;
+  uint8_t rotStepCorrection = 16/rotMicrostep ; //devide EBB-Coordinates by this factor to get EGGduino-Steps
+  uint8_t penStepCorrection = 16/penMicrostep ; //devide EBB-Coordinates by this factor to get EGGduino-Steps
   float rotSpeed=0; 
   float penSpeed=0; // these are local variables for Function SteppermotorMove-Command, but for performance-reasons it will be initialized here
 
@@ -72,4 +71,6 @@ void setup() {
 
 void loop() {
      SCmd.readSerial();  
+	 if( 0 == digitalRead(PrgButton))
+		prgButtonState == 1;
 }
