@@ -17,12 +17,12 @@ Thanks to my wife and my daughter for their patience. :-)
 /* TODOs:
 1	collision control via penMin/penMax
 2	implement homing sequence via microswitch or optical device
-3	implement hardware-button , EGGBOT-Guys call it "PRG-Button"
 */
 #include "AccelStepper.h"
 //#include "libs\AccelStepper.h" // nice lib from http://www.airspayce.com/mikem/arduino/AccelStepper/
 #include <Servo.h>
 #include "SerialCommand.h" //nice lib from Stefan Rado, https://github.com/kroimon/Arduino-SerialCommand
+#include <avr/eeprom.h>
 
 #define initSting "EBBv13_and_above Protocol emulated by Eggduino-Firmware V1.4"
 //Rotational Stepper
@@ -37,7 +37,17 @@ Thanks to my wife and my daughter for their patience. :-)
   #define penMicrostep 16 //MicrostepMode, only 1,2,4,8,16 allowed, because of Integer-Math in this Sketch
 //Servo
   #define servoPin 3
-  #define PrgButton 2 //optional Pushbutton between Pin and Ground to use certain functions with Eggbot-Inkscape extension
+// PRG button
+  #define prgButton 2
+// pen up/down button
+  #define penToggleButton 12
+// motors enable button
+  #define motorsButton 4
+
+  #define penUpPosEEAddress ((uint16_t *)0)
+  #define penDownPosEEAddress ((uint16_t *)2)
+
+  #define debounceDelay 50
 
 //make Objects
   AccelStepper rotMotor(1, step1, dir1);
@@ -62,6 +72,45 @@ Thanks to my wife and my daughter for their patience. :-)
   uint8_t penStepCorrection = 16/penMicrostep ; //devide EBB-Coordinates by this factor to get EGGduino-Steps
   float rotSpeed=0; 
   float penSpeed=0; // these are local variables for Function SteppermotorMove-Command, but for performance-reasons it will be initialized here
+  int motorsEnabled = 0;
+
+  typedef void (*ActionCb)(void);
+
+  class Button {
+    public:
+	Button(byte p, ActionCb a): debounce(0), state(1), lastState(1), action(a), pin(p) {};
+
+        void check() {
+          byte b = digitalRead(pin);
+          long t = millis();
+
+          if (b != lastState) {
+            debounce = t;
+          }
+
+          if ((t - debounce) > debounceDelay) {
+            if (b != state) {
+              state = b;
+
+            if (!state) {
+              (*action)();
+            }
+          }
+        }
+
+        lastState = b;
+      }
+
+    private:
+	long debounce;
+	byte state:1;
+	byte lastState:1;
+        byte pin;
+        ActionCb action;
+  };
+
+  Button penToggle(penToggleButton, doTogglePen);
+  Button motorsToggle(motorsButton, toggleMotors);
 
 void setup() {   
     Serial.begin(9600);
@@ -70,7 +119,9 @@ void setup() {
 }
 
 void loop() {
-     SCmd.readSerial();  
-	 if( 0 == digitalRead(PrgButton))
-		prgButtonState == 1;
+     SCmd.readSerial();
+     penToggle.check();
+     motorsToggle.check();
+     if( 0 == digitalRead(prgButton))
+	prgButtonState = 1;
 }
