@@ -1,3 +1,10 @@
+05.05.2015 v1.6
+imported some improvements from user "bartebor"
+fixed some timing issues
+added button-support via #ifdefine
+worked on penarm-shaking-bug
+restructured some codesegments
+
 29.03.2015 v1.4
 added prototype for PRG-Button support. somebody has to test it. Connect pushbutton between Pin2 und GND.
 disabled ccordinate transform for 16-microstepping, because Inkscape sends in 16-microstepping, as well.

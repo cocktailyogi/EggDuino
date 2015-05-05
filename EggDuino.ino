@@ -18,44 +18,55 @@ Thanks to my wife and my daughter for their patience. :-)
 1	collision control via penMin/penMax
 2	implement homing sequence via microswitch or optical device
 */
-#include "AccelStepper.h"
-//#include "libs\AccelStepper.h" // nice lib from http://www.airspayce.com/mikem/arduino/AccelStepper/
+
+#include "AccelStepper.h" // nice lib from http://www.airspayce.com/mikem/arduino/AccelStepper/
 #include <Servo.h>
 #include "SerialCommand.h" //nice lib from Stefan Rado, https://github.com/kroimon/Arduino-SerialCommand
 #include <avr/eeprom.h>
+#include "button.h"
 
-#define initSting "EBBv13_and_above Protocol emulated by Eggduino-Firmware V1.4"
-//Rotational Stepper
+#define initSting "EBBv13_and_above Protocol emulated by Eggduino-Firmware V1.6"
+//Rotational Stepper:
   #define step1 11
   #define dir1 10
   #define enableRotMotor 9
   #define rotMicrostep 16  //MicrostepMode, only 1,2,4,8,16 allowed, because of Integer-Math in this Sketch
-//Pen Stepper
+//Pen Stepper:
   #define step2 8
   #define dir2 7
   #define enablePenMotor 6
   #define penMicrostep 16 //MicrostepMode, only 1,2,4,8,16 allowed, because of Integer-Math in this Sketch
-//Servo
-  #define servoPin 3
-// PRG button
-  #define prgButton 2
-// pen up/down button
-  #define penToggleButton 12
-// motors enable button
-  #define motorsButton 4
+
+  #define servoPin 3 //Servo
+  
+// EXTRAFEATURES - UNCOMMENT TO USE THEM -------------------------------------------------------------------
+
+// #define prgButton 2 // PRG button
+// #define penToggleButton 12 // pen up/down button
+// #define motorsButton 4 // motors enable button
+
+// #define CommandSMQB
+//-----------------------------------------------------------------------------------------------------------
 
   #define penUpPosEEAddress ((uint16_t *)0)
   #define penDownPosEEAddress ((uint16_t *)2)
-
-  #define debounceDelay 50
 
 //make Objects
   AccelStepper rotMotor(1, step1, dir1);
   AccelStepper penMotor(1, step2, dir2);
   Servo penServo; 
   SerialCommand SCmd;
-  
-// Variables... be careful, by messing around here, evrything has a reason and crossrelations...
+  //create Buttons
+	#ifdef prgButton
+		Button prgButtonToggle(prgButton, setprgButtonState);
+	#endif
+	#ifdef penToggleButton
+		Button penToggle(penToggleButton, doTogglePen);
+	#endif
+	#ifdef motorsButton
+		Button motorsToggle(motorsButton, toggleMotors);
+  	#endif
+// Variables... be careful, by messing around here, everything has a reason and crossrelations...
   int penMin=0;
   int penMax=0;
   int penUpPos=5;  //can be overwritten from EBB-Command SC
@@ -72,46 +83,8 @@ Thanks to my wife and my daughter for their patience. :-)
   uint8_t penStepCorrection = 16/penMicrostep ; //devide EBB-Coordinates by this factor to get EGGduino-Steps
   float rotSpeed=0; 
   float penSpeed=0; // these are local variables for Function SteppermotorMove-Command, but for performance-reasons it will be initialized here
-  int motorsEnabled = 0;
-
-  typedef void (*ActionCb)(void);
-
-  class Button {
-    public:
-	Button(byte p, ActionCb a): debounce(0), state(1), lastState(1), action(a), pin(p) {};
-
-        void check() {
-          byte b = digitalRead(pin);
-          long t = millis();
-
-          if (b != lastState) {
-            debounce = t;
-          }
-
-          if ((t - debounce) > debounceDelay) {
-            if (b != state) {
-              state = b;
-
-            if (!state) {
-              (*action)();
-            }
-          }
-        }
-
-        lastState = b;
-      }
-
-    private:
-	long debounce;
-	byte state:1;
-	byte lastState:1;
-        byte pin;
-        ActionCb action;
-  };
-
-  Button penToggle(penToggleButton, doTogglePen);
-  Button motorsToggle(motorsButton, toggleMotors);
-
+  boolean motorsEnabled = 0;
+ 
 void setup() {   
     Serial.begin(9600);
     makeComInterface();
@@ -119,9 +92,22 @@ void setup() {
 }
 
 void loop() {
-     SCmd.readSerial();
-     penToggle.check();
-     motorsToggle.check();
-     if( 0 == digitalRead(prgButton))
-	prgButtonState = 1;
+	if ( penMotor.distanceToGo() || rotMotor.distanceToGo() ) {
+		penMotor.runSpeedToPosition(); // Moving.... moving... moving....
+		rotMotor.runSpeedToPosition();
+	}
+	
+	SCmd.readSerial();
+	
+	#ifdef penToggleButton
+	   penToggle.check();
+	#endif
+	
+	#ifdef motorsButton
+		motorsToggle.check();
+	#endif
+	
+	#ifdef prgButton
+		prgButtonToggle.check();
+	#endif
 }

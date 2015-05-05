@@ -3,7 +3,7 @@ Eggduino
 
 Arduino Firmware for Eggbot / Spherebot with Inkscape-Integration
 
-Version 1.4s
+Version 1.6
 tested with Inkscape Portable 0.91, Eggbot Extension and patched eggbot.py
 
 Regards: Eggduino-Firmware by Joachim Cerny, 2015
@@ -17,6 +17,7 @@ Features:
 - No collision-detection!!
 - Supported Servos: At least one type ;-) I use Arduino Servo-Lib with TG9e- standard servo.
 - Full Arduino-Compatible. I used an Arduino Uno
+- Button-support (3 buttons)
 
 Tested and fully functional with Inkscape.
 
