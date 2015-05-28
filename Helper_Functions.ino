@@ -6,18 +6,6 @@ void initHardware(){
 
   pinMode(enableRotMotor, OUTPUT); 
   pinMode(enablePenMotor, OUTPUT);  
-  
-  	#ifdef prgButton
-		pinMode(prgButton, INPUT_PULLUP);
-  	#endif
-	  
-	#ifdef penToggleButton
-		pinMode(penToggleButton, INPUT_PULLUP);
-	#endif
-	
-	#ifdef motorsButton
-		pinMode(motorsButton, INPUT_PULLUP);
-	#endif
 
   rotMotor.setMaxSpeed(2000.0);
   rotMotor.setAcceleration(10000.0);
@@ -26,7 +14,7 @@ void initHardware(){
   motorsOff();
   penServo.attach(servoPin);
   penServo.write(penState);
-  }
+}
 
 void inline loadPenPosFromEE() {
   penUpPos = eeprom_read_word(penUpPosEEAddress);
@@ -92,7 +80,7 @@ bool parseSMArgs(uint16_t *duration, int *penStepsEBB, int *rotStepsEBB) {
 	return false;
 }
 
-void doMove(uint16_t duration, int penStepsEBB, int rotStepsEBB) {
+void prepareMove(uint16_t duration, int penStepsEBB, int rotStepsEBB) {
 	if (!motorsEnabled) {
 		motorsOn();
 	}
@@ -126,12 +114,20 @@ void doMove(uint16_t duration, int penStepsEBB, int rotStepsEBB) {
 		penMotor.move(penStepsToGo);
 		penMotor.setSpeed( penSpeed );
 	}
-/*
+}
+
+void moveOneStep() {
+	if ( penMotor.distanceToGo() || rotMotor.distanceToGo() ) {
+		penMotor.runSpeedToPosition(); // Moving.... moving... moving....
+		rotMotor.runSpeedToPosition();
+	}
+}
+
+void moveToDestination() {
 	while ( penMotor.distanceToGo() || rotMotor.distanceToGo() ) {
 		penMotor.runSpeedToPosition(); // Moving.... moving... moving....
 		rotMotor.runSpeedToPosition();
 	}
-	*/
 }
 
 void setprgButtonState(){

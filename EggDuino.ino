@@ -45,7 +45,6 @@ Thanks to my wife and my daughter for their patience. :-)
 // #define penToggleButton 12 // pen up/down button
 // #define motorsButton 4 // motors enable button
 
-// #define CommandSMQB
 //-----------------------------------------------------------------------------------------------------------
 
   #define penUpPosEEAddress ((uint16_t *)0)
@@ -92,15 +91,12 @@ void setup() {
 }
 
 void loop() {
-	if ( penMotor.distanceToGo() || rotMotor.distanceToGo() ) {
-		penMotor.runSpeedToPosition(); // Moving.... moving... moving....
-		rotMotor.runSpeedToPosition();
-	}
+	moveOneStep();
 	
 	SCmd.readSerial();
 	
 	#ifdef penToggleButton
-	   penToggle.check();
+		penToggle.check();
 	#endif
 	
 	#ifdef motorsButton

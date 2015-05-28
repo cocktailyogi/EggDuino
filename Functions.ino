@@ -5,9 +5,6 @@ void makeComInterface(){
   SCmd.addCommand("SC",stepperModeConfigure);
   SCmd.addCommand("SP",setPen);
   SCmd.addCommand("SM",stepperMove);
-  #ifdef CommandSMQB
-	  SCmd.addCommand("SMQB",stepperMoveQueryButton); // composite function enabling smooth movement
-  #endif
   SCmd.addCommand("SE",ignore);
   SCmd.addCommand("TP",togglePen);
   SCmd.addCommand("PO",ignore);    //Engraver command, not implemented, gives fake answer
@@ -20,7 +17,7 @@ void makeComInterface(){
   SCmd.addCommand("QP",queryPen);
   SCmd.addCommand("QB",queryButton);  //"PRG" Button, 
   SCmd.setDefaultHandler(unrecognized); // Handler for command that isn't matched (says "What?") 
-  }
+}
 
 void queryPen() {
 	char state;
@@ -89,10 +86,8 @@ void stepperMove() {
   uint16_t duration=0; //in ms
   int penStepsEBB=0; //Pen
   int rotStepsEBB=0; //Rot
-  while ( penMotor.distanceToGo() || rotMotor.distanceToGo() ) {
-	  		penMotor.runSpeedToPosition(); // Moving.... moving... moving....
-	  		rotMotor.runSpeedToPosition();
-  }
+
+  moveToDestination();
 
   if (!parseSMArgs(&duration, &penStepsEBB, &rotStepsEBB)) {
     sendError();
@@ -103,46 +98,19 @@ void stepperMove() {
   
   if ( (penStepsEBB==0) && (rotStepsEBB==0) ) {
     delay(duration);
-    //sendAck();
     return;
   }
 
-  doMove(duration, penStepsEBB, rotStepsEBB);
-  //sendAck();
+  prepareMove(duration, penStepsEBB, rotStepsEBB);
 }
-
-#ifdef CommandSMQB
-	void stepperMoveQueryButton() {
-	  uint16_t duration=0; //in ms
-	  int penStepsEBB=0; //Pen
-	  int rotStepsEBB=0; //Rot
-
-	  if (!parseSMArgs(&duration, &penStepsEBB, &rotStepsEBB)) {
-		sendError();
-		return;
-	  }
-
-	  if ( (penStepsEBB==0) && (rotStepsEBB==0) ) {
-		delay(duration);
-		queryButton();
-		return;
-	  }
-
-	  // sending ACK before actual move to allow buffering 
-	  queryButton();
-	  doMove(duration, penStepsEBB, rotStepsEBB);
-	}
-#endif
-
 
 void setPen(){
   int cmd;
   int value;
   char *arg;
-    while ( penMotor.distanceToGo() || rotMotor.distanceToGo() ) {
-	    penMotor.runSpeedToPosition(); // Moving.... moving... moving....
-	    rotMotor.runSpeedToPosition();
-    }
+
+  moveToDestination();
+
   arg = SCmd.next(); 
   if (arg != NULL) {
       cmd = atoi(arg);
@@ -180,10 +148,9 @@ void setPen(){
 void togglePen(){
   int value;
   char *arg;
-    while ( penMotor.distanceToGo() || rotMotor.distanceToGo() ) {
-				penMotor.runSpeedToPosition(); // Moving.... moving... moving....
-				rotMotor.runSpeedToPosition();
-    }
+
+  moveToDestination();
+
   arg = SCmd.next(); 
   if (arg != NULL) 
       value = atoi(arg);
@@ -286,12 +253,12 @@ void stepperModeConfigure(){
 void sendVersion(){
   Serial.print(initSting);
   Serial.print("\r\n");
-  }
+}
   
-  void unrecognized(const char *command){
+void unrecognized(const char *command){
   sendError();
-  }
+}
   
-  void ignore(){
+void ignore(){
   sendAck();
-  }
+}
