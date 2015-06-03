@@ -44,7 +44,3 @@ http://wiki.evilmadscientist.com/Installing_software
 				#		return serialPort
 		- In my version lines 1355-1360
  
-Todos and Feature-Wishlist:
-
-- implement hardware-button , EGGBOT-Guys call it "PRG-Button"
-  

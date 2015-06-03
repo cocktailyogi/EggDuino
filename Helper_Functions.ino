@@ -1,45 +1,33 @@
 void initHardware(){
-  // enable eeprom wait in avr/eeprom.h functions
-  SPMCSR &= ~SELFPRGEN;
+	// enable eeprom wait in avr/eeprom.h functions
+	SPMCSR &= ~SELFPRGEN;
 
-  loadPenPosFromEE();
+	loadPenPosFromEE();
 
-  pinMode(enableRotMotor, OUTPUT); 
-  pinMode(enablePenMotor, OUTPUT);  
-  
-  	#ifdef prgButton
-		pinMode(prgButton, INPUT_PULLUP);
-  	#endif
-	  
-	#ifdef penToggleButton
-		pinMode(penToggleButton, INPUT_PULLUP);
-	#endif
-	
-	#ifdef motorsButton
-		pinMode(motorsButton, INPUT_PULLUP);
-	#endif
+	pinMode(enableRotMotor, OUTPUT);
+	pinMode(enablePenMotor, OUTPUT);
 
-  rotMotor.setMaxSpeed(2000.0);
-  rotMotor.setAcceleration(10000.0);
-  penMotor.setMaxSpeed(2000.0);
-  penMotor.setAcceleration(10000.0);
-  motorsOff();
-  penServo.attach(servoPin);
-  penServo.write(penState);
-  }
+	rotMotor.setMaxSpeed(2000.0);
+	rotMotor.setAcceleration(10000.0);
+	penMotor.setMaxSpeed(2000.0);
+	penMotor.setAcceleration(10000.0);
+	motorsOff();
+	penServo.attach(servoPin);
+	penServo.write(penState);
+}
 
 void inline loadPenPosFromEE() {
-  penUpPos = eeprom_read_word(penUpPosEEAddress);
-  penDownPos = eeprom_read_word(penDownPosEEAddress);
-  penState = penUpPos;
+	penUpPos = eeprom_read_word(penUpPosEEAddress);
+	penDownPos = eeprom_read_word(penDownPosEEAddress);
+	penState = penUpPos;
 }
 
 void inline storePenUpPosInEE() {
-  eeprom_update_word(penUpPosEEAddress, penUpPos);
+	eeprom_update_word(penUpPosEEAddress, penUpPos);
 }
 
 void inline storePenDownPosInEE() {
-  eeprom_update_word(penDownPosEEAddress, penDownPos);
+	eeprom_update_word(penDownPosEEAddress, penDownPos);
 }
 
 void inline sendAck(){
@@ -65,7 +53,7 @@ void motorsOn() {
 void toggleMotors() {
 	if (motorsEnabled) {
 		motorsOff();
-		} else {
+	} else {
 		motorsOn();
 	}
 }
@@ -85,14 +73,14 @@ bool parseSMArgs(uint16_t *duration, int *penStepsEBB, int *rotStepsEBB) {
 	}
 	if (arg3 != NULL) {
 		*rotStepsEBB = atoi(arg3);
-		
+
 		return true;
 	}
 
 	return false;
 }
 
-void doMove(uint16_t duration, int penStepsEBB, int rotStepsEBB) {
+void prepareMove(uint16_t duration, int penStepsEBB, int rotStepsEBB) {
 	if (!motorsEnabled) {
 		motorsOn();
 	}
@@ -102,7 +90,7 @@ void doMove(uint16_t duration, int penStepsEBB, int rotStepsEBB) {
 		rotMotor.setSpeed( abs( (float)rotStepsEBB * (float)1000 / (float)duration ) );
 		penMotor.move(penStepsEBB);
 		penMotor.setSpeed( abs( (float)penStepsEBB * (float)1000 / (float)duration ) );
-		} else {
+	} else {
 		//incoming EBB-Steps will be multiplied by 16, then Integer-maths is done, result will be divided by 16
 		// This make thinks here really complicated, but floating point-math kills performance and memory, believe me... I tried...
 		long rotSteps =   (  (long)rotStepsEBB * 16 / rotStepCorrection) + (long)rotStepError;	//correct incoming EBB-Steps to our microstep-Setting and multiply  by 16 to avoid floatingpoint...
@@ -126,12 +114,20 @@ void doMove(uint16_t duration, int penStepsEBB, int rotStepsEBB) {
 		penMotor.move(penStepsToGo);
 		penMotor.setSpeed( penSpeed );
 	}
-/*
+}
+
+void moveOneStep() {
+	if ( penMotor.distanceToGo() || rotMotor.distanceToGo() ) {
+		penMotor.runSpeedToPosition(); // Moving.... moving... moving....
+		rotMotor.runSpeedToPosition();
+	}
+}
+
+void moveToDestination() {
 	while ( penMotor.distanceToGo() || rotMotor.distanceToGo() ) {
 		penMotor.runSpeedToPosition(); // Moving.... moving... moving....
 		rotMotor.runSpeedToPosition();
 	}
-	*/
 }
 
 void setprgButtonState(){
