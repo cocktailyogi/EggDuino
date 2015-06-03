@@ -25,7 +25,7 @@
 #include <avr/eeprom.h>
 #include "button.h"
 
-#define initSting "EBBv13_and_above Protocol emulated by Eggduino-Firmware V1.6"
+#define initSting "EBBv13_and_above Protocol emulated by Eggduino-Firmware V1.61"
 //Rotational Stepper:
 #define step1 11
 #define dir1 10
