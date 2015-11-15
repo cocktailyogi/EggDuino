@@ -3,7 +3,7 @@ Eggduino
 
 Arduino Firmware for Eggbot / Spherebot with Inkscape-Integration
 
-Version 1.61
+Version 1.6a
 tested with Inkscape Portable 0.91, Eggbot Extension and patched eggbot.py
 
 Regards: Eggduino-Firmware by Joachim Cerny, 2015
