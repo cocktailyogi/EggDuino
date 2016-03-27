@@ -34,22 +34,24 @@ http://wiki.evilmadscientist.com/Installing_software
 - Eggduino cannot be detected by default by the Eggbot-extension
 	Hopefully, the guys will fix this later on. But we can fix it on our own.
 	Go to your Inkscape-Installation folder and navigate to subfolder .\App\Inkscape\share\extensions
-	
+		
     For version 2.5.0:
 		- open file "eggbot.py" in text editor and search for the line:
 			"Try any devices which seem to have EBB boards attached"
         - comment that block with "#" like this:
-                # Try any devices which seem to have EBB boards attached
-				# for strComPort in eggbot_scan.findEiBotBoards():
-				#	serialPort = self.testSerialPort( strComPort )
-				#	if serialPort:
-				#		self.svgSerialPort = strComPort
-				#		return serialPort
+			```
+			# Try any devices which seem to have EBB boards attached
+			# for strComPort in eggbot_scan.findEiBotBoards():
+			#	serialPort = self.testSerialPort( strComPort )
+			#	if serialPort:
+			#		self.svgSerialPort = strComPort
+			#		return serialPort
+			```
 		- In my version lines 1355-1360
 		
 	For version 2.7.1:
 		- open file "ebb_serial.py" in text editor and search for the following block:
-			
+			```
 			EBBport = None
 			for port in comPortsList:
 				if port[1].startswith("EiBotBoard"):
@@ -60,12 +62,14 @@ http://wiki.evilmadscientist.com/Installing_software
 					if port[2].startswith("USB VID:PID=04D8:FD92"):
 						EBBport = port[0] #Success; EBB found by VID/PID match.
 						break	#stop searching-- we are done.		
-						
+			```			
 		- replace "04D8:FD92" with the VID/PID of your Arduino device.	
 		
 		- alternatively, you can replace "EBBport = None" with your specific port number:
+			```
 			EBBport = "COMxx"				#Windows
 			EBBport = "/dev/tty[something]"	#Linux/Mac	
+			```
 
 		
  
