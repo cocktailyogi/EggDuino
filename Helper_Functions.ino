@@ -1,3 +1,5 @@
+
+
 void initHardware(){
 	// enable eeprom wait in avr/eeprom.h functions
 	SPMCSR &= ~SELFPRGEN;
@@ -19,6 +21,8 @@ void initHardware(){
 void inline loadPenPosFromEE() {
 	penUpPos = eeprom_read_word(penUpPosEEAddress);
 	penDownPos = eeprom_read_word(penDownPosEEAddress);
+  servoRateUp = eeprom_read_word(penUpRateEEAddress);
+  servoRateDown = eeprom_read_word(penDownRateEEAddress);
 	penState = penUpPos;
 }
 

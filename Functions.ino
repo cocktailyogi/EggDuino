@@ -22,9 +22,9 @@ void makeComInterface(){
 void queryPen() {
 	char state;
 	if (penState==penUpPos)
-		state='1';
-	else
 		state='0';
+	else
+		state='1';
 	Serial.print(String(state)+"\r\n");
 	sendAck();
 }
@@ -104,6 +104,19 @@ void stepperMove() {
 	prepareMove(duration, penStepsEBB, rotStepsEBB);
 }
 
+
+void setPenUp() {
+  penServo.write(penUpPos, servoRateUp, true);
+  penState=penUpPos;
+}
+
+
+void setPenDown() {
+  penServo.write(penDownPos, servoRateDown, true);
+  penState=penDownPos;
+}
+
+
 void setPen(){
 	int cmd;
 	int value;
@@ -116,13 +129,11 @@ void setPen(){
 		cmd = atoi(arg);
 		switch (cmd) {
 			case 0:
-				penServo.write(penUpPos);
-				penState=penUpPos;
+				setPenDown();
 				break;
 
 			case 1:
-				penServo.write(penDownPos);
-				penState=penDownPos;
+				setPenUp();
 				break;
 
 			default:
@@ -164,11 +175,9 @@ void togglePen(){
 
 void doTogglePen() {
 	if (penState==penUpPos) {
-		penServo.write(penDownPos);
-		penState=penDownPos;
+		setPenDown();
 	} else   {
-		penServo.write(penUpPos);
-		penState=penUpPos;
+		setPenUp();
 	}
 }
 
@@ -224,12 +233,12 @@ void stepperModeConfigure(){
 		value = atoi(val);
 	if ((arg != NULL) && (val != NULL)){
 		switch (cmd) {
-			case 4: penDownPos= (int) ((float) (value-6000)/(float) 133.3); // transformation from EBB to PWM-Servo
-				storePenDownPosInEE();
+			case 4: penUpPos= (int) ((float) (value-6000)/(float) 133.3); // transformation from EBB to PWM-Servo
+				storePenUpPosInEE();
 				sendAck();
 				break;
-			case 5: penUpPos= (int)((float) (value-6000)/(float) 133.3); // transformation from EBB to PWM-Servo
-				storePenUpPosInEE();
+			case 5: penDownPos= (int)((float) (value-6000)/(float) 133.3); // transformation from EBB to PWM-Servo
+				storePenDownPosInEE();
 				sendAck();
 				break;
 			case 6: //rotMin=value;    ignored
@@ -238,12 +247,14 @@ void stepperModeConfigure(){
 			case 7: //rotMax=value;    ignored
 				sendAck();
 				break;
-			case 11: servoRateUp=value;
-				 sendAck();
-				 break;
-			case 12: servoRateDown=value;
-				 sendAck();
-				 break;
+			case 11: servoRateUp=value / 5;
+        eeprom_update_word(penUpRateEEAddress, servoRateUp);
+				sendAck();
+				break;
+			case 12: servoRateDown=value / 5;
+			  eeprom_update_word(penDownRateEEAddress, servoRateDown);     
+				sendAck();
+				break;
 			default:
 				 sendError();
 		}
