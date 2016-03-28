@@ -5,9 +5,9 @@ void makeComInterface(){
 	SCmd.addCommand("SC",stepperModeConfigure);
 	SCmd.addCommand("SP",setPen);
 	SCmd.addCommand("SM",stepperMove);
-  SCmd.addCommand("SE",setEngraver);
+	SCmd.addCommand("SE",setEngraver);
 	SCmd.addCommand("TP",togglePen);
-  SCmd.addCommand("PD",ignore);
+	SCmd.addCommand("PD",ignore);
 	SCmd.addCommand("PO",pinOutput);
 	SCmd.addCommand("NI",nodeCountIncrement);
 	SCmd.addCommand("ND",nodeCountDecrement);
@@ -107,14 +107,14 @@ void stepperMove() {
 
 
 void setPenUp() {
-  penServo.write(penUpPos, servoRateUp, true);
-  penState=penUpPos;
+	penServo.write(penUpPos, servoRateUp, true);
+	penState=penUpPos;
 }
 
 
 void setPenDown() {
-  penServo.write(penDownPos, servoRateDown, true);
-  penState=penDownPos;
+	penServo.write(penDownPos, servoRateDown, true);
+	penState=penDownPos;
 }
 
 
@@ -261,37 +261,37 @@ void stepperModeConfigure(){
 }
 
 void pinOutput(){
-  char *arg1;
-  char *arg2;
-  char *arg3;
-  int val;
+	char *arg1;
+	char *arg2;
+	char *arg3;
+	int val;
 
-  arg1 = SCmd.next();
-  arg2 = SCmd.next();
-  arg3 = SCmd.next();
-  if (arg1 == NULL || arg2 == NULL || arg3 == NULL) {
-    sendError();
-    return;
-  }
-  //PO,B,3,0 = disable engraver
-  //PO,B,3,1 = enable engraver
-  if (arg1[0] == 'B' && arg2[0] == '3') {
-    val = atoi(arg3);
-    digitalWrite(engraverPin, val);
-  }
-  sendAck();
+	arg1 = SCmd.next();
+	arg2 = SCmd.next();
+	arg3 = SCmd.next();
+	if (arg1 == NULL || arg2 == NULL || arg3 == NULL) {
+		sendError();
+		return;
+	}
+	//PO,B,3,0 = disable engraver
+	//PO,B,3,1 = enable engraver
+	if (arg1[0] == 'B' && arg2[0] == '3') {
+		val = atoi(arg3);
+		digitalWrite(engraverPin, val);
+	}
+	sendAck();
 }
 
 //currently inkscape extension is using PO command for engraver instead of SE
 void setEngraver(){
-  char *arg;
-  int val;
-  arg = SCmd.next();
-  if (arg != NULL) {
-    val = atoi(arg);
-    digitalWrite(engraverPin, val);
-  }
-  sendAck();
+	char *arg;
+	int val;
+	arg = SCmd.next();
+	if (arg != NULL) {
+		val = atoi(arg);
+		digitalWrite(engraverPin, val);
+	}
+	sendAck();
 }
 
 void sendVersion(){

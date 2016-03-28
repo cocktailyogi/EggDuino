@@ -8,7 +8,7 @@ void initHardware(){
 
 	pinMode(enableRotMotor, OUTPUT);
 	pinMode(enablePenMotor, OUTPUT);
-  pinMode(engraverPin, OUTPUT);
+	pinMode(engraverPin, OUTPUT);
 
 	rotMotor.setMaxSpeed(2000.0);
 	rotMotor.setAcceleration(10000.0);
@@ -22,8 +22,8 @@ void initHardware(){
 void loadPenPosFromEE() {
 	penUpPos = eeprom_read_word(penUpPosEEAddress);
 	penDownPos = eeprom_read_word(penDownPosEEAddress);
-  servoRateUp = eeprom_read_word(penUpRateEEAddress);
-  servoRateDown = eeprom_read_word(penDownRateEEAddress);
+	servoRateUp = eeprom_read_word(penUpRateEEAddress);
+	servoRateDown = eeprom_read_word(penDownRateEEAddress);
 	penState = penUpPos;
 }
 
