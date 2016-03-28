@@ -8,6 +8,7 @@ void initHardware(){
 
 	pinMode(enableRotMotor, OUTPUT);
 	pinMode(enablePenMotor, OUTPUT);
+  pinMode(engraverPin, OUTPUT);
 
 	rotMotor.setMaxSpeed(2000.0);
 	rotMotor.setAcceleration(10000.0);
@@ -39,7 +40,7 @@ void sendAck(){
 }
 
 void sendError(){
-	Serial.print("unknown CMD\r\n");
+	Serial.print("!8 Err: Unknown command\r\n");
 }
 
 void motorsOff() {
