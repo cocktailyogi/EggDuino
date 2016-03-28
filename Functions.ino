@@ -147,11 +147,9 @@ void setPen(){
 		sendAck();
 		delay(value);
 	}
-	if (val==NULL && arg !=NULL)  {
+	if (val==NULL && arg !=NULL)
 		sendAck();
-		delay(500);
-	}
-	//	Serial.println("delay");
+
 	if (val==NULL && arg ==NULL)
 		sendError();
 }  
