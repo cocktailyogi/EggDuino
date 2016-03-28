@@ -18,7 +18,7 @@ void initHardware(){
 	penServo.write(penState);
 }
 
-void inline loadPenPosFromEE() {
+void loadPenPosFromEE() {
 	penUpPos = eeprom_read_word(penUpPosEEAddress);
 	penDownPos = eeprom_read_word(penDownPosEEAddress);
   servoRateUp = eeprom_read_word(penUpRateEEAddress);
@@ -26,19 +26,19 @@ void inline loadPenPosFromEE() {
 	penState = penUpPos;
 }
 
-void inline storePenUpPosInEE() {
+void storePenUpPosInEE() {
 	eeprom_update_word(penUpPosEEAddress, penUpPos);
 }
 
-void inline storePenDownPosInEE() {
+void storePenDownPosInEE() {
 	eeprom_update_word(penDownPosEEAddress, penDownPos);
 }
 
-void inline sendAck(){
+void sendAck(){
 	Serial.print("OK\r\n");
 }
 
-void inline sendError(){
+void sendError(){
 	Serial.print("unknown CMD\r\n");
 }
 
