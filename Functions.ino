@@ -130,11 +130,13 @@ void setPen(){
 		cmd = atoi(arg);
 		switch (cmd) {
 			case 0:
+        sendAck();
 				setPenDown();
 				break;
 
 			case 1:
-				setPenUp();
+        sendAck();
+				setPenUp();        
 				break;
 
 			default:
@@ -145,14 +147,8 @@ void setPen(){
 	val = SCmd.next();
 	if (val != NULL) {
 		value = atoi(val);
-		sendAck();
 		delay(value);
 	}
-	if (val==NULL && arg !=NULL)
-		sendAck();
-
-	if (val==NULL && arg ==NULL)
-		sendError();
 }  
 
 void togglePen(){
