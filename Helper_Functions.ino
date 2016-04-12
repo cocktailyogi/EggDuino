@@ -1,3 +1,5 @@
+
+
 void initHardware(){
 	// enable eeprom wait in avr/eeprom.h functions
 	SPMCSR &= ~SELFPRGEN;
@@ -6,6 +8,7 @@ void initHardware(){
 
 	pinMode(enableRotMotor, OUTPUT);
 	pinMode(enablePenMotor, OUTPUT);
+	pinMode(engraverPin, OUTPUT);
 
 	rotMotor.setMaxSpeed(2000.0);
 	rotMotor.setAcceleration(10000.0);
@@ -16,26 +19,28 @@ void initHardware(){
 	penServo.write(penState);
 }
 
-void inline loadPenPosFromEE() {
+void loadPenPosFromEE() {
 	penUpPos = eeprom_read_word(penUpPosEEAddress);
 	penDownPos = eeprom_read_word(penDownPosEEAddress);
+	servoRateUp = eeprom_read_word(penUpRateEEAddress);
+	servoRateDown = eeprom_read_word(penDownRateEEAddress);
 	penState = penUpPos;
 }
 
-void inline storePenUpPosInEE() {
+void storePenUpPosInEE() {
 	eeprom_update_word(penUpPosEEAddress, penUpPos);
 }
 
-void inline storePenDownPosInEE() {
+void storePenDownPosInEE() {
 	eeprom_update_word(penDownPosEEAddress, penDownPos);
 }
 
-void inline sendAck(){
+void sendAck(){
 	Serial.print("OK\r\n");
 }
 
-void inline sendError(){
-	Serial.print("unknown CMD\r\n");
+void sendError(){
+	Serial.print("!8 Err: Unknown command\r\n");
 }
 
 void motorsOff() {

@@ -20,40 +20,79 @@
  */
 
 #include "AccelStepper.h" // nice lib from http://www.airspayce.com/mikem/arduino/AccelStepper/
-#include <Servo.h>
+#include "VarSpeedServo.h" // variable speed servo lib https://github.com/netlabtoolkit/VarSpeedServo
 #include "SerialCommand.h" //nice lib from Stefan Rado, https://github.com/kroimon/Arduino-SerialCommand
 #include <avr/eeprom.h>
 #include "button.h"
 
-#define initSting "EBBv13_and_above Protocol emulated by Eggduino-Firmware V1.6a"
-//Rotational Stepper:
-#define step1 11
-#define dir1 10
-#define enableRotMotor 9
-#define rotMicrostep 16  //MicrostepMode, only 1,2,4,8,16 allowed, because of Integer-Math in this Sketch
-//Pen Stepper:
-#define step2 8
-#define dir2 7
-#define enablePenMotor 6
-#define penMicrostep 16 //MicrostepMode, only 1,2,4,8,16 allowed, because of Integer-Math in this Sketch
 
-#define servoPin 3 //Servo
+#define initSting "EBBv13_and_above Protocol emulated by Eggduino-Firmware V1.x"
 
-// EXTRAFEATURES - UNCOMMENT TO USE THEM -------------------------------------------------------------------
+#define BOARD_ZAGGO
+//#define BOARD_CNCSHIELD
 
-// #define prgButton 2 // PRG button
-// #define penToggleButton 12 // pen up/down button
-// #define motorsButton 4 // motors enable button
+#ifdef BOARD_ZAGGO
+	//Zaggo SphereBot design: http://pleasantsoftware.com/developer/3d/spherebot/
+	//Rotational Stepper:
+	#define step1 11
+	#define dir1 10
+	#define enableRotMotor 9
+	#define rotMicrostep 16  //MicrostepMode, only 1,2,4,8,16 allowed, because of Integer-Math in this Sketch
+	//Pen Stepper:
+	#define step2 8
+	#define dir2 7
+	#define enablePenMotor 6
+	#define penMicrostep 16 //MicrostepMode, only 1,2,4,8,16 allowed, because of Integer-Math in this Sketch
+	//Servo
+	#define servoPin 3
+	#define engraverPin 5
+	//Buttons (uncomment to enable)
+	//#define prgButton 2 // PRG button
+	//#define penToggleButton 12 // pen up/down button
+	//#define motorsButton 4 // motors enable button
+#endif
+
+#ifdef BOARD_CNCSHIELD
+	//CNC Shield: http://blog.protoneer.co.nz/arduino-cnc-shield/
+	//Rotational Stepper: ("X")
+	#define step1 2
+	#define dir1 5
+	#define enableRotMotor 8
+	#define rotMicrostep 16  //MicrostepMode, only 1,2,4,8,16 allowed, because of Integer-Math in this Sketch
+	//Pen Stepper:        ("Y")
+	#define step2 3
+	#define dir2 6
+	#define enablePenMotor 8
+	#define penMicrostep 16 //MicrostepMode, only 1,2,4,8,16 allowed, because of Integer-Math in this Sketch
+	//Servo
+	#define servoPin 12          // "SpnEn"
+	#define engraverPin 13       // "SpnDir"
+	//Buttons
+	#define prgButton A0         // PRG button ("Abort")
+	#define penToggleButton A1   // pen up/down button ("Hold")
+	#define motorsButton A2      // motors enable button ("Resume")
+#endif
+
 
 //-----------------------------------------------------------------------------------------------------------
 
+
 #define penUpPosEEAddress ((uint16_t *)0)
 #define penDownPosEEAddress ((uint16_t *)2)
+#define penUpRateEEAddress ((uint16_t *)4)
+#define penDownRateEEAddress ((uint16_t *)6)
+
+void setprgButtonState();
+void doTogglePen();
+void toggleMotors();
+void makeComInterface();
+void initHardware();
+void moveOneStep();
 
 //make Objects
 AccelStepper rotMotor(1, step1, dir1);
 AccelStepper penMotor(1, step2, dir2);
-Servo penServo;
+VarSpeedServo penServo;
 SerialCommand SCmd;
 //create Buttons
 #ifdef prgButton
@@ -70,8 +109,8 @@ int penMin=0;
 int penMax=0;
 int penUpPos=5;  //can be overwritten from EBB-Command SC
 int penDownPos=20; //can be overwritten from EBB-Command SC
-int servoRateUp=0; //from EBB-Protocol not implemented on machine-side
-int servoRateDown=0; //from EBB-Protocol not implemented on machine-side
+int servoRateUp=0;
+int servoRateDown=0;
 long rotStepError=0;
 long penStepError=0;
 int penState=penUpPos;
