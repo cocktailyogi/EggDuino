@@ -85,6 +85,9 @@
 void setprgButtonState();
 void doTogglePen();
 void toggleMotors();
+void makeComInterface();
+void initHardware();
+void moveOneStep();
 
 //make Objects
 AccelStepper rotMotor(1, step1, dir1);
