@@ -2,8 +2,12 @@
 
 void initHardware(){
 	// enable eeprom wait in avr/eeprom.h functions
-	SPMCSR &= ~SELFPRGEN;
-
+  
+  #ifdef BOARD_RAMPS
+  #else 
+  	SPMCSR &= ~SELFPRGEN;
+  #endif
+  
 	loadPenPosFromEE();
 
 	pinMode(enableRotMotor, OUTPUT);
