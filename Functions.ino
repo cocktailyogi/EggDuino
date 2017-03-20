@@ -5,9 +5,10 @@ void makeComInterface(){
 	SCmd.addCommand("SC",stepperModeConfigure);
 	SCmd.addCommand("SP",setPen);
 	SCmd.addCommand("SM",stepperMove);
-	SCmd.addCommand("SE",ignore);
+	SCmd.addCommand("SE",setEngraver);
 	SCmd.addCommand("TP",togglePen);
-	SCmd.addCommand("PO",ignore);    //Engraver command, not implemented, gives fake answer
+	SCmd.addCommand("PD",ignore);
+	SCmd.addCommand("PO",pinOutput);
 	SCmd.addCommand("NI",nodeCountIncrement);
 	SCmd.addCommand("ND",nodeCountDecrement);
 	SCmd.addCommand("SN",setNodeCount);
@@ -22,9 +23,9 @@ void makeComInterface(){
 void queryPen() {
 	char state;
 	if (penState==penUpPos)
-		state='1';
-	else
 		state='0';
+	else
+		state='1';
 	Serial.print(String(state)+"\r\n");
 	sendAck();
 }
@@ -104,6 +105,19 @@ void stepperMove() {
 	prepareMove(duration, penStepsEBB, rotStepsEBB);
 }
 
+
+void setPenUp() {
+	penServo.write(penUpPos, servoRateUp, true);
+	penState=penUpPos;
+}
+
+
+void setPenDown() {
+	penServo.write(penDownPos, servoRateDown, true);
+	penState=penDownPos;
+}
+
+
 void setPen(){
 	int cmd;
 	int value;
@@ -116,13 +130,13 @@ void setPen(){
 		cmd = atoi(arg);
 		switch (cmd) {
 			case 0:
-				penServo.write(penUpPos);
-				penState=penUpPos;
+        sendAck();
+				setPenDown();
 				break;
 
 			case 1:
-				penServo.write(penDownPos);
-				penState=penDownPos;
+        sendAck();
+				setPenUp();        
 				break;
 
 			default:
@@ -133,16 +147,8 @@ void setPen(){
 	val = SCmd.next();
 	if (val != NULL) {
 		value = atoi(val);
-		sendAck();
 		delay(value);
 	}
-	if (val==NULL && arg !=NULL)  {
-		sendAck();
-		delay(500);
-	}
-	//	Serial.println("delay");
-	if (val==NULL && arg ==NULL)
-		sendError();
 }  
 
 void togglePen(){
@@ -164,11 +170,9 @@ void togglePen(){
 
 void doTogglePen() {
 	if (penState==penUpPos) {
-		penServo.write(penDownPos);
-		penState=penDownPos;
+		setPenDown();
 	} else   {
-		penServo.write(penUpPos);
-		penState=penUpPos;
+		setPenUp();
 	}
 }
 
@@ -224,12 +228,12 @@ void stepperModeConfigure(){
 		value = atoi(val);
 	if ((arg != NULL) && (val != NULL)){
 		switch (cmd) {
-			case 4: penDownPos= (int) ((float) (value-6000)/(float) 133.3); // transformation from EBB to PWM-Servo
-				storePenDownPosInEE();
+			case 4: penUpPos= (int) ((float) (value-6000)/(float) 133.3); // transformation from EBB to PWM-Servo
+				storePenUpPosInEE();
 				sendAck();
 				break;
-			case 5: penUpPos= (int)((float) (value-6000)/(float) 133.3); // transformation from EBB to PWM-Servo
-				storePenUpPosInEE();
+			case 5: penDownPos= (int)((float) (value-6000)/(float) 133.3); // transformation from EBB to PWM-Servo
+				storePenDownPosInEE();
 				sendAck();
 				break;
 			case 6: //rotMin=value;    ignored
@@ -238,16 +242,52 @@ void stepperModeConfigure(){
 			case 7: //rotMax=value;    ignored
 				sendAck();
 				break;
-			case 11: servoRateUp=value;
-				 sendAck();
-				 break;
-			case 12: servoRateDown=value;
-				 sendAck();
-				 break;
+			case 11: servoRateUp=value / 5;
+        eeprom_update_word(penUpRateEEAddress, servoRateUp);
+				sendAck();
+				break;
+			case 12: servoRateDown=value / 5;
+			  eeprom_update_word(penDownRateEEAddress, servoRateDown);     
+				sendAck();
+				break;
 			default:
 				 sendError();
 		}
 	}
+}
+
+void pinOutput(){
+	char *arg1;
+	char *arg2;
+	char *arg3;
+	int val;
+
+	arg1 = SCmd.next();
+	arg2 = SCmd.next();
+	arg3 = SCmd.next();
+	if (arg1 == NULL || arg2 == NULL || arg3 == NULL) {
+		sendError();
+		return;
+	}
+	//PO,B,3,0 = disable engraver
+	//PO,B,3,1 = enable engraver
+	if (arg1[0] == 'B' && arg2[0] == '3') {
+		val = atoi(arg3);
+		digitalWrite(engraverPin, val);
+	}
+	sendAck();
+}
+
+//currently inkscape extension is using PO command for engraver instead of SE
+void setEngraver(){
+	char *arg;
+	int val;
+	arg = SCmd.next();
+	if (arg != NULL) {
+		val = atoi(arg);
+		digitalWrite(engraverPin, val);
+	}
+	sendAck();
 }
 
 void sendVersion(){
