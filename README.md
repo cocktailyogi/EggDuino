@@ -44,3 +44,15 @@ http://wiki.evilmadscientist.com/Installing_software
 				#		return serialPort
 		- In my version lines 1355-1360
  
+- In a more recent version of the Inkscape Eggbot-extension, the detection is done by the `findPort()` function in ebb_serial.py:57 (v0.3 - June 28, 2016), which filters on VID:PID.
+The first `startswith()` checks for an Eibot board; just add a second one with the VID/PID of your board, in my case "2341:0043" for an Arduino Uno.
+You can find it with lsusb.
+```
+                if EBBport is None:
+                        for port in comPortsList:
+                                if port[2].startswith("USB VID:PID=04D8:FD92")\
+                                or port[2].startswith("USB VID:PID=2341:0043"): # Eggduino on Arduino Uno 
+                                        EBBport = port[0] #Success; EBB found by VID/PID match.
+                                        break   #stop searching-- we are done.                          
+```
+- Another way to make an Arduino Uno be detected
